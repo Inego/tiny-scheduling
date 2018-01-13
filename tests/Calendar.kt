@@ -1,35 +1,52 @@
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.Before
+import org.junit.Test
 import java.time.LocalDate
+import kotlin.test.*
 
 class CalendarTest {
-    private val startingDate = LocalDate.of(2017, 1, 15)!!
+    private val startingDate = d(1, 15)
 
     lateinit var calendar: Calendar
 
-    @BeforeEach
+    @Before
     fun beforeEach() {
         calendar = Calendar(startingDate, ::isWeekend)
     }
 
     @Test
     fun testNew() {
-        Assertions.assertEquals(startingDate, calendar.intToDate(0))
-        Assertions.assertEquals(0, calendar.dateToInt(startingDate))
+        assertEquals(startingDate, calendar.intToDate(0))
+        assertEquals(0, calendar.dateToInt(startingDate))
     }
 
     @Test
     fun testNextDateFromInt() {
         // Assuming it's Monday
-        Assertions.assertEquals(LocalDate.of(2017, 1, 16), calendar.intToDate(1))
+        assertEquals(d(1, 16), calendar.intToDate(1))
     }
 
     @Test
     fun testNextDateFromDate() {
-
+        // Assuming it's Monday
+        assertEquals(1, calendar.dateToInt(d(1, 16)))
     }
 
+    @Test
+    fun testExceptionOnHolidayToInt() {
+        assertFails {
+            print(calendar.dateToInt(d(1, 20)))
+        }
+    }
 
+    @Test
+    fun testSkipWeekendToInt() {
+        assertEquals(5, calendar.dateToInt(d(1, 22)))
+    }
 
+    @Test
+    fun testSkipWeekendToDate() {
+        assertEquals(d(1, 22), calendar.intToDate(5))
+    }
+
+    private fun d(m: Int, d: Int) = LocalDate.of(2018, m, d)!!
 }

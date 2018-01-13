@@ -6,8 +6,10 @@ interface ICalendar {
     fun dateToInt(date: LocalDate): Int
 }
 
-fun isWeekend(date: LocalDate): Boolean =
-        date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY
+fun isWeekend(date: LocalDate): Boolean {
+    val dayOfWeek = date.dayOfWeek
+    return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY
+}
 
 /**
  * A thread-unsafe implementation of [ICalendar].
@@ -47,6 +49,10 @@ class Calendar(private val startingDate: LocalDate, private val holidayChecker: 
 
         if (date <= lastDate)
             return dateMap.getValue(date)
+
+        if (holidayChecker(date))
+            // Prevent infinite loop
+            throw AssertionError()
 
         fillUntil { lastDate == date }
 
