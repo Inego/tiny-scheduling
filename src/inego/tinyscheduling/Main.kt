@@ -1,10 +1,14 @@
+package inego.tinyscheduling
+
 import java.time.LocalDate
 
 val startingDate = LocalDate.of(2017, 1, 15)!!
 
 fun main(args: Array<String>) {
 
-    val p = Project(Calendar(startingDate, ::isWeekend))
+    val calendar = Calendar(startingDate, ::isWeekend)
+
+    val p = Project(calendar)
 
     val yanis = Developer("Yanis", TaskType.BACK_END)
     val dima = Developer("Dima", TaskType.FRONT_END)
@@ -16,7 +20,7 @@ fun main(args: Array<String>) {
             TaskType.BACK_END,
             0.7,
             yanis,
-            startingDate = LocalDate.of(2017, 2, 1)
+            startingDate = calendar.dateToInt(LocalDate.of(2017, 2, 1))
     ))
 
     p.addDeveloper(dima)
@@ -31,4 +35,10 @@ fun main(args: Array<String>) {
     p.addFullStackTask("Employees", 3, 3)
     p.addFullStackTask("Partners", 6, 4)
     p.addFullStackTask("Marketing", 3, 3)
+
+    repeat(1000) {
+        val solution = p.createRandomSolution()
+        println(solution.computeCost())
+    }
+
 }
