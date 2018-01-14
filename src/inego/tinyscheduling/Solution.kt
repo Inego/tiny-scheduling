@@ -9,13 +9,17 @@ const val UNFINISHED_TASK_PENALTY = 7
 
 data class SolutionScore(val length: Int, val penalty: Double)
 
-class Solution(private val project: Project) {
+class Solution(val project: Project) {
     private val assignments: MutableMap<Task, TaskAssignment> = hashMapOf()
 
     fun assign(task: Task, date: Int, developer: Developer) {
-        if (task.type != developer.type)
+        assign(task, TaskAssignment(date, developer))
+    }
+
+    fun assign(task: Task, taskAssignment: TaskAssignment) {
+        if (task.type != taskAssignment.developer.type)
             throw AssertionError()
-        assignments.put(task, TaskAssignment(date, developer))
+        assignments.put(task, taskAssignment)
     }
 
     fun computeCost(): SolutionScore {
@@ -104,4 +108,6 @@ class Solution(private val project: Project) {
             assignments.keys.forEach { put(it, 0.0) }
         }
     }
+
+    fun getAssignment(task: Task): TaskAssignment = assignments.getValue(task)
 }
