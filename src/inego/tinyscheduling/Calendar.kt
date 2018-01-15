@@ -30,6 +30,8 @@ class Calendar(private val startingDate: LocalDate, private val holidayChecker: 
             do {
                 lastDate = lastDate.plusDays(1)
             } while (holidayChecker(lastDate))
+            intMap.put(lastInt, lastDate)
+            dateMap.put(lastDate, lastInt)
         } while (!condition())
     }
 

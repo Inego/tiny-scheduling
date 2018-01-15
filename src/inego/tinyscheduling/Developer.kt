@@ -6,4 +6,8 @@ class Developer(
         val efficiency: Double = 1.0,
         val leader: Developer? = null,
         val startingDate: Int? = null
-)
+) {
+    override fun toString(): String {
+        return name
+    }
+}

@@ -49,7 +49,7 @@ class SolutionTest {
     }
 
     private fun assertSolutionCost(assertedLength: Int, assertedPenalty: Double) {
-        val (length, penalty) = s.computeCost()
+        val (length, penalty) = s.cost
         assertEquals(assertedLength, length, "Incorrect solution length")
         assertEquals(assertedPenalty, penalty, "Incorrect solution penalty")
     }

@@ -7,7 +7,7 @@ class Project(private val calendar: Calendar) : ICalendar by calendar {
     val tasks: MutableList<Task> = mutableListOf()
     val developers: MutableList<Developer> = mutableListOf()
 
-    private val maxEstimatedLength: Int by lazy {
+    internal val maxEstimatedLength: Int by lazy {
         ceil(tasks.sumByDouble { it.cost }).toInt()
     }
 
@@ -45,5 +45,55 @@ class Project(private val calendar: Calendar) : ICalendar by calendar {
         }
 
         return result
+    }
+
+    val possibleTaskAssignments: Map<Task, List<TaskAssignment>> by lazy {
+        val result = mutableMapOf<Task, List<TaskAssignment>>()
+
+        for (task in tasks) {
+
+            val list = mutableListOf<TaskAssignment>()
+
+            for (developer in devsByType.getValue(task.type)) {
+                (0..maxEstimatedLength).mapTo(list) { TaskAssignment(it, developer) }
+            }
+
+            result.put(task, list)
+        }
+
+        result
+    }
+
+    fun randomModification(source: Solution): Modification {
+
+        val task = tasks.getRandomElement()
+
+        var (date, developer) = source.assignments.getValue(task)
+
+        if (tossCoin()) {
+            // Change date
+
+            val dir = when {
+                date <= 0 -> 1
+                date >= maxEstimatedLength -> -1
+                else -> if (tossCoin()) 1 else -1
+            }
+
+            date += dir * (1 + rnd.nextInt(MAX_DATE_MUTATION))
+
+            if (date < 0)
+                date = 0
+
+            return ChangeDate(task, date)
+
+        }
+        else {
+            // Change to a different dev of the same type
+            val type = developer.type
+
+            // TODO this may crash if the current developer is the only one of his type
+            developer = devsByType.getValue(type).filter { it != developer }.getRandomElement()
+            return ChangeDeveloper(task, developer)
+        }
     }
 }

@@ -8,4 +8,6 @@ class Task(
 ) {
     constructor(name: String, type: TaskType, cost: Int, dependsOn: Task? = null)
             : this(name, type, cost.toDouble(), dependsOn = dependsOn)
+
+    override fun toString() = name
 }
