@@ -4,7 +4,7 @@ import java.time.LocalDate
 import kotlin.math.ceil
 import kotlin.math.max
 
-val startingDate = LocalDate.of(2018, 1, 16)!!
+val startingDate = LocalDate.of(2018, 1, 17)!!
 
 fun main(args: Array<String>) {
 
@@ -13,21 +13,21 @@ fun main(args: Array<String>) {
     val p = Project(calendar)
 
     val yanis = Developer("Yanis", TaskType.BACK_END)
-    val dima = Developer("Dima", TaskType.FRONT_END)
+    val dima = Developer("Dima", TaskType.FRONT_END, efficiency = 0.8)
 
     p.addDeveloper(yanis)
-    p.addDeveloper(Developer("Alex", TaskType.BACK_END, 0.9, leader = yanis))
+    p.addDeveloper(Developer("Alex", TaskType.BACK_END, 0.8, leader = yanis, startingDate = 6))
     p.addDeveloper(Developer(
             "Misha",
             TaskType.BACK_END,
-            0.8,
+            0.7,
             startingDate = calendar.dateToInt(LocalDate.of(2018, 2, 1)),
             leader = yanis
     ))
 
     p.addDeveloper(dima)
-    p.addDeveloper(Developer("Sveta", TaskType.FRONT_END))
-    p.addDeveloper(Developer("Max", TaskType.FRONT_END))
+    p.addDeveloper(Developer("Sveta", TaskType.FRONT_END, efficiency = 0.8))
+    p.addDeveloper(Developer("Max", TaskType.FRONT_END, efficiency = 0.7))
 
     p.addFullStackTask("Admin panel", 9, 6)
     p.addFullStackTask("Reports", 5, 3)
@@ -42,8 +42,12 @@ fun main(args: Array<String>) {
 //    useGenetic(p, calendar)
 //    useMCTS(p)
 
-    useBranchAndBound(p)
+//    useBranchAndBound(p)
+    useMctsBranchAndBound(p)
+
 }
+
+
 
 
 fun randomWithMCTS(p: Project, maxIter: Int): Solution {
@@ -138,7 +142,7 @@ private fun useGenetic(p: Project, calendar: Calendar) {
         var pop = p.createRandomPopulationByMCTS(50, 1000)
 
         var bestWeight = Double.MAX_VALUE
-        var bestSolution: Solution? = null
+        var bestSolution: Solution?
 
         var genCounter = 0
         var maxGens = 10000

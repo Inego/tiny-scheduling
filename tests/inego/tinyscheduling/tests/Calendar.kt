@@ -17,7 +17,7 @@ fun calendarFactory() = Calendar(startingDate, ::isWeekend)
 
 class CalendarTest {
 
-    lateinit var calendar: Calendar
+    private lateinit var calendar: Calendar
 
     @Before
     fun beforeEach() {

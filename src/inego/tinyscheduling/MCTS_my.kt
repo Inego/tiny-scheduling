@@ -2,7 +2,6 @@ package inego.tinyscheduling
 
 import java.util.Objects.hash
 import kotlin.math.ln
-import kotlin.math.min
 import kotlin.math.sqrt
 
 val c = sqrt(2.0)
@@ -49,8 +48,6 @@ class ChangeDate(tsk: Task, private val date: Int) : Modification(tsk) {
 }
 
 
-class ChildInfo(val modification: Modification, var node: Node?)
-
 class Node(val parent: Node?) {
     var children: LinkedHashMap<Modification, Node?>? = null
     var playouts = 0
@@ -63,8 +60,8 @@ class Node(val parent: Node?) {
 
 }
 
-class Tree(val project: Project) {
-    val root = Node(null)
+class Tree(private val project: Project) {
+    private val root = Node(null)
 
     fun playout(baseSolution: Solution, treeBest: Double, maxDepth: Int): Solution {
 
@@ -88,8 +85,6 @@ class Tree(val project: Project) {
                 }
 
                 val modification: Modification = project.randomModification(solution)
-
-                var sum = 0.0
 
                 val children = currentNode.children!!
 

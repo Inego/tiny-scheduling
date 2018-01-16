@@ -1,7 +1,7 @@
 package inego.tinyscheduling
 
 class Task(
-        val name: String,
+        private val name: String,
         val type: TaskType,
         val cost: Double,
         val dependsOn: Task? = null

@@ -1,7 +1,5 @@
 package inego.tinyscheduling
 
-import kotlin.test.assertEquals
-
 data class TaskAssignment(val date: Int, val developer: Developer) {
     init {
         if (date < 0) {

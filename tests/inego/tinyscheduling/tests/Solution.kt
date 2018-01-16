@@ -7,8 +7,8 @@ import kotlin.test.assertEquals
 
 class SolutionTest {
 
-    lateinit var p: Project
-    lateinit var s: Solution
+    private lateinit var p: Project
+    private lateinit var s: Solution
 
     @Before
     fun before() {
@@ -26,7 +26,7 @@ class SolutionTest {
 
     @Test
     fun `penalty for an unhandled task`() {
-        val t = addTask(1)
+        addTask(1)
         assertSolutionCost(1, UNFINISHED_TASK_PENALTY.toDouble())
     }
 

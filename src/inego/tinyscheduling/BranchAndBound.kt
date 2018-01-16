@@ -1,6 +1,5 @@
 package inego.tinyscheduling
 
-import java.lang.Long.max
 import kotlin.math.max
 
 
@@ -9,15 +8,17 @@ typealias BranchAndBoundSolution = List<BranchAndBoundAssignment>
 class BranchAndBound(val project: Project) {
     var best = Int.MAX_VALUE
     var bestSolution: BranchAndBoundSolution? = null
+    var counter = 0
 }
 
 class BranchAndBoundAssignment(
         val task: Task,
         val developer: Developer,
-        val start: Int,
+        private val start: Int,
         val end: Int
 ) {
     override fun toString(): String = "$task to $developer ($start - $end)"
+    fun toString(calendar: Calendar): String = "$task to $developer (${calendar.hoursToString(start)} - ${calendar.hoursToString(end)})"
 }
 
 fun branchAndBoundRecursion(
@@ -25,10 +26,22 @@ fun branchAndBoundRecursion(
         leftTasks: Set<Task>,
         tasks: Map<Task, Int>,
         devs: Map<Developer, Int>,
-        currentSolution: BranchAndBoundSolution
+        currentSolution: BranchAndBoundSolution,
+        solutionEnd: Int
 ) {
+    bb.counter++
+//    if (bb.counter % 100000 == 0) {
+//        println(bb.counter)
+//    }
+
+    currentSolution
+            .filter { it.end > solutionEnd }
+            .forEach { throw AssertionError() }
 
     // Compose a list of possible assignments
+
+    if (solutionEnd >= bb.best)
+        return
 
     val assignments: MutableList<BranchAndBoundAssignment> = mutableListOf()
 
@@ -44,7 +57,7 @@ fun branchAndBoundRecursion(
                 start = max(start, tasks.getValue(task.dependsOn))
             }
 
-            val end: Int = start + (task.cost.toDouble() * 8 / developer.efficiency).toInt()
+            val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
 
             if (end < bb.best) {
                 assignments.add(BranchAndBoundAssignment(task, developer, start, end))
@@ -56,33 +69,39 @@ fun branchAndBoundRecursion(
         return
     }
 
-//    assignments.sortBy { it.end }
-
-
+    assignments.sortBy { it.end }
 
     // Iterate recursively
 
     if (leftTasks.size == 1) {
         // Just take the first assignment, it is locally best
 
-        //assignments.shuffle()
-        assignments.sortBy { it.end }
+//        assignments.sortBy { it.end }
 
         val firstAssignment = assignments.first()
 
-        bb.best = firstAssignment.end
-        bb.bestSolution = currentSolution + firstAssignment
+        val end = max(solutionEnd, firstAssignment.end)
 
-        println(bb.best)
+        if (end < bb.best) {
+            bb.best = end
+            bb.bestSolution = currentSolution + firstAssignment
 
-    }
-    else {
-        assignments.shuffle()
+            println(bb.best)
+            printBbSolution(bb.bestSolution!!, bb.project.calendar)
+        }
+    } else {
+//        assignments.shuffle()
         for (assignment in assignments) {
+
             val end = assignment.end
+
+            if (solutionEnd == 0) {
+                println(assignment)
+            }
+
             if (end >= bb.best)
-                continue
-//                break
+//                continue
+                break
 
             val task = assignment.task
 
@@ -99,20 +118,26 @@ fun branchAndBoundRecursion(
                     leftTasks - task,
                     newTasks,
                     newDevs,
-                    currentSolution + assignment
+                    currentSolution + assignment,
+                    max(solutionEnd, assignment.end)
             )
         }
     }
+}
 
+fun printBbSolution(solution: BranchAndBoundSolution, calendar: Calendar) {
 
-
-
+    for (assignment in solution) {
+        println(assignment.toString(calendar))
+    }
 
 }
 
-fun useBranchAndBound(p: Project) {
+
+fun useBranchAndBound(p: Project, initial: Int = Int.MAX_VALUE) {
 
     val bb = BranchAndBound(p)
+    bb.best = initial
 
     val tasks = mapOf<Task, Int>()
 
@@ -124,6 +149,6 @@ fun useBranchAndBound(p: Project) {
     }
 
     val leftTasks = p.tasks.toSet()
-    branchAndBoundRecursion(bb, leftTasks, tasks, devs, emptyList())
+    branchAndBoundRecursion(bb, leftTasks, tasks, devs, emptyList(), 0)
 
 }

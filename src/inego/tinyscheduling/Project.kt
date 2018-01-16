@@ -3,7 +3,7 @@ package inego.tinyscheduling
 import java.util.*
 import kotlin.math.ceil
 
-class Project(private val calendar: Calendar) : ICalendar by calendar {
+class Project(val calendar: Calendar) : ICalendar by calendar {
     val tasks: MutableList<Task> = mutableListOf()
     val developers: MutableList<Developer> = mutableListOf()
 
@@ -45,23 +45,6 @@ class Project(private val calendar: Calendar) : ICalendar by calendar {
         }
 
         return result
-    }
-
-    val possibleTaskAssignments: Map<Task, List<TaskAssignment>> by lazy {
-        val result = mutableMapOf<Task, List<TaskAssignment>>()
-
-        for (task in tasks) {
-
-            val list = mutableListOf<TaskAssignment>()
-
-            for (developer in devsByType.getValue(task.type)) {
-                (0..maxEstimatedLength).mapTo(list) { TaskAssignment(it, developer) }
-            }
-
-            result.put(task, list)
-        }
-
-        result
     }
 
     fun randomModification(source: Solution): Modification {
