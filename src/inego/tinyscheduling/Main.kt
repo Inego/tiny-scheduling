@@ -1,7 +1,6 @@
 package inego.tinyscheduling
 
 import java.time.LocalDate
-import java.util.function.DoubleBinaryOperator
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -40,9 +39,10 @@ fun main(args: Array<String>) {
     p.addFullStackTask("Marketing", 3, 3)
 
 
-    useGenetic(p, calendar)
-
+//    useGenetic(p, calendar)
 //    useMCTS(p)
+
+    useBranchAndBound(p)
 }
 
 
