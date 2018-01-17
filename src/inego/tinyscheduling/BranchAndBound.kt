@@ -108,10 +108,10 @@ fun branchAndBoundRecursion(
             // Copy all collections to be used downstream
 
             val newTasks = tasks.toMutableMap()
-            newTasks.put(task, end)
+            newTasks[task] = end
 
             val newDevs = devs.toMutableMap()
-            newDevs.put(assignment.developer, end)
+            newDevs[assignment.developer] = end
 
             branchAndBoundRecursion(
                     bb,
@@ -145,7 +145,7 @@ fun useBranchAndBound(p: Project, initial: Int = Int.MAX_VALUE) {
     val devs: MutableMap<Developer, Int> = mutableMapOf()
 
     for (developer in p.developers) {
-        devs.put(developer, if (developer.startingDate == null) 0 else developer.startingDate * 8)
+        devs[developer] = if (developer.startingDate == null) 0 else developer.startingDate * 8
     }
 
     val leftTasks = p.tasks.toSet()

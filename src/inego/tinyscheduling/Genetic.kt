@@ -32,7 +32,7 @@ class ComputationEstimate(population: Population) {
             if (weight > maxWeight)
                 maxWeight = weight
 
-            weights.put(solution, weight)
+            weights[solution] = weight
         }
     }
 
@@ -65,7 +65,7 @@ class Population(private val project: Project, val individuals: List<Solution>) 
         for ((solution, weight) in weights.entries) {
             val fitness = (maxWeight - weight) / denominator
             if (fitness > DEATH_THRESHOLD)
-                parents.put(solution, fitness)
+                parents[solution] = fitness
         }
 
         // Now sort the parents reversely
@@ -79,7 +79,7 @@ class Population(private val project: Project, val individuals: List<Solution>) 
         val sortedWeightedParents: MutableMap<Solution, Double> = LinkedHashMap(sortedParents.size)
         for ((solution, fitness) in sortedParents.entries) {
             fitnessSum += fitness
-            sortedWeightedParents.put(solution, fitnessSum)
+            sortedWeightedParents[solution] = fitnessSum
         }
 
         val result: MutableList<Solution> = mutableListOf(estimate.best!!)

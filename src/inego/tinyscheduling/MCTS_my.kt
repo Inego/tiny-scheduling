@@ -138,7 +138,7 @@ class Tree(private val project: Project) {
                     modification.applyTo(solution)
 
                     val childNode = Node(currentNode)
-                    currentNode.children!!.put(modification, childNode)
+                    currentNode.children!![modification] = childNode
 
                     currentNode = childNode
 

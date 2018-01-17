@@ -39,7 +39,7 @@ class Solution(val project: Project) {
     fun assign(task: Task, taskAssignment: TaskAssignment) {
         if (task.type != taskAssignment.developer.type)
             throw AssertionError()
-        assignments.put(task, taskAssignment)
+        assignments[task] = taskAssignment
     }
 
     private fun computeCost(): SolutionScore {
@@ -63,7 +63,7 @@ class Solution(val project: Project) {
             // Assign tasks which are scheduled beginning from this day
             for ((task, developer) in byDates.getOrDefault(currentDate, emptyList())) {
                 unassigned.remove(task)
-                developerTasks.put(developer, task)
+                developerTasks[developer] = task
             }
 
             finishedToday.clear()
@@ -76,7 +76,7 @@ class Solution(val project: Project) {
 
                 val currentAccumulated = accumulated.getValue(task) + developerEfficiency
 
-                accumulated.put(task, currentAccumulated)
+                accumulated[task] = currentAccumulated
 
                 if (currentAccumulated >= task.cost) {
                     finishedToday.add(Pair(task, developer))

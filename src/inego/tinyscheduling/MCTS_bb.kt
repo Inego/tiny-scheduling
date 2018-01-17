@@ -18,7 +18,7 @@ class BbTree(private val project: Project) {
         val devs: MutableMap<Developer, Int> = mutableMapOf()
 
         for (developer in project.developers) {
-            devs.put(developer, if (developer.startingDate == null) 0 else developer.startingDate * 8)
+            devs[developer] = if (developer.startingDate == null) 0 else developer.startingDate * 8
         }
 
         var currentNode = root
@@ -51,7 +51,7 @@ class BbTree(private val project: Project) {
                         val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
 
                         if (end < best) {
-                            children.put(BranchAndBoundAssignment(task, developer, start, end), null)
+                            children[BranchAndBoundAssignment(task, developer, start, end)] = null
                         }
                     }
                 }
@@ -103,15 +103,15 @@ class BbTree(private val project: Project) {
 
                 if (node == null) {
                     node = BbNode(currentNode)
-                    children.put(childAssignment, node)
+                    children[childAssignment] = node
                 }
 
                 currentNode = node
                 currentSolution.add(childAssignment)
 
                 leftTasks.remove(childAssignment.task)
-                tasks.put(childAssignment.task, childAssignment.end)
-                devs.put(childAssignment.developer, childAssignment.end)
+                tasks[childAssignment.task] = childAssignment.end
+                devs[childAssignment.developer] = childAssignment.end
             }
         }
 
