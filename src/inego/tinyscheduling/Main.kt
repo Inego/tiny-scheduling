@@ -4,7 +4,7 @@ import java.time.LocalDate
 import kotlin.math.ceil
 import kotlin.math.max
 
-val startingDate = LocalDate.of(2018, 1, 17)!!
+val startingDate = LocalDate.of(2018, 1, 22)!!
 
 fun main(args: Array<String>) {
 
@@ -14,9 +14,10 @@ fun main(args: Array<String>) {
 
     val yanis = Developer("Yanis", TaskType.BACK_END)
     val dima = Developer("Dima", TaskType.FRONT_END, efficiency = 0.8)
+    val alex = Developer("Alex", TaskType.BACK_END, 0.8, leader = yanis)
 
     p.addDeveloper(yanis)
-    p.addDeveloper(Developer("Alex", TaskType.BACK_END, 0.8, leader = yanis, startingDate = 6))
+    p.addDeveloper(alex)
     p.addDeveloper(Developer(
             "Misha",
             TaskType.BACK_END,
@@ -27,7 +28,7 @@ fun main(args: Array<String>) {
 
     p.addDeveloper(dima)
     p.addDeveloper(Developer("Sveta", TaskType.FRONT_END, efficiency = 0.8))
-    p.addDeveloper(Developer("Max", TaskType.FRONT_END, efficiency = 0.7))
+//    p.addDeveloper(Developer("Max", TaskType.FRONT_END, efficiency = 0.7))
 
     p.addFullStackTask("Admin panel", 9, 6)
     p.addFullStackTask("Reports", 5, 3)
@@ -37,14 +38,13 @@ fun main(args: Array<String>) {
     p.addFullStackTask("Employees", 3, 3)
     p.addFullStackTask("Partners", 6, 4)
     p.addFullStackTask("Marketing", 3, 3)
-
+    p.addFullStackTask("Closing", 3, 2, backOnlyBy=alex)
 
 //    useGenetic(p, calendar)
 //    useMCTS(p)
 
 //    useBranchAndBound(p)
     useMctsBranchAndBound(p)
-
 }
 
 

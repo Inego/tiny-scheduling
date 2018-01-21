@@ -2,7 +2,6 @@ package inego.tinyscheduling
 
 import java.util.Comparator
 import java.util.concurrent.ThreadLocalRandom
-import kotlin.test.assertEquals
 
 const val MUTATION_FACTOR = 3
 const val MAX_DATE_MUTATION = 5
@@ -146,8 +145,6 @@ fun createChildFromParents(parent1: Solution, parent2: Solution): Solution {
         }
         child.assign(task, childAssignment)
     }
-
-    assertEquals(16, child.assignments.size)
 
     return child
 }
