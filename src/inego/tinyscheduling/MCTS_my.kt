@@ -5,6 +5,7 @@ import kotlin.math.ln
 import kotlin.math.sqrt
 
 val c = sqrt(2.0)
+//val c = 1.5
 
 
 abstract class Modification(val task: Task) {

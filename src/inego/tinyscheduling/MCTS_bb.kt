@@ -44,7 +44,11 @@ class BbTree(private val project: Project) {
                 val parentTask = task.dependsOn
                 if (parentTask != null && parentTask !in tasks) continue
 
-                for (developer in project.devsByType.getValue(task.type)) {
+
+                val possibleDevs = if (task.onlyBy != null) listOf(task.onlyBy)
+                else project.devsByType.getValue(task.type)
+
+                for (developer in possibleDevs) {
                     var start = devs.getValue(developer)
 
                     if (parentTask != null) {
