@@ -143,9 +143,8 @@ fun useBranchAndBound(p: Project, initial: Int = Int.MAX_VALUE) {
 
     // Prepare developer availability times
     val devs: MutableMap<Developer, Int> = mutableMapOf()
-
     for (developer in p.developers) {
-        devs[developer] = if (developer.startingDate == null) 0 else developer.startingDate * 8
+        devs[developer] = developer.startingDate * 8
     }
 
     val leftTasks = p.tasks.toSet()

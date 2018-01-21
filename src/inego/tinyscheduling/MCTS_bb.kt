@@ -15,11 +15,7 @@ class BbTree(private val project: Project) {
 
         val leftTasks: MutableSet<Task> = project.tasks.toMutableSet()
         val tasks: MutableMap<Task, Int> = mutableMapOf()
-        val devs: MutableMap<Developer, Int> = mutableMapOf()
-
-        for (developer in project.developers) {
-            devs[developer] = if (developer.startingDate == null) 0 else developer.startingDate * 8
-        }
+        val devs = project.developers.associate { Pair(it, it.startingDate * 8) }.toMutableMap()
 
         var currentNode = root
 
@@ -29,11 +25,12 @@ class BbTree(private val project: Project) {
 
         while (leftTasks.isNotEmpty()) {
 
-            if (currentNode.children == null) {
+            var children = currentNode.children
+            if (children == null) {
 
                 // Explode
 
-                val children = LinkedHashMap<BranchAndBoundAssignment, BbNode?>()
+                children = LinkedHashMap<BranchAndBoundAssignment, BbNode?>()
                 currentNode.children = children
 
                 for (task in leftTasks) {
@@ -57,8 +54,6 @@ class BbTree(private val project: Project) {
                 }
             }
 
-            val children = currentNode.children!!
-
             val choices: MutableList<BranchAndBoundAssignment> = mutableListOf()
 
             val toRemove: MutableList<BranchAndBoundAssignment> = mutableListOf()
@@ -78,18 +73,14 @@ class BbTree(private val project: Project) {
 
             if (choices.isEmpty()) {
                 for (i in currentSolution.size - 1 downTo 0) {
-                    if (currentNode.parent == null) {
-                        break
-                    }
-                    currentNode = currentNode.parent!!
+                    currentNode = currentNode.parent ?: break
                     val assignment = currentSolution[i]
-                    val ch = currentNode.children!!
+                    val ch = children
                     ch.remove(assignment)
 
                     if (ch.isNotEmpty()) {
                         break
                     }
-
                 }
 
                 return
