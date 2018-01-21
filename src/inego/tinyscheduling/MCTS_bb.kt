@@ -1,19 +1,26 @@
 package inego.tinyscheduling
 
+import java.util.*
+import kotlin.math.ln
 import kotlin.math.max
+import kotlin.math.sqrt
 
-class BbNode(
-        val parent: BbNode?,
-        var unplayedChildren: MutableList<BranchAndBoundAssignment>
-) {
-    var playouts = 0
+class BbNode(val parent: BbNode?, val aggScore: Int) {
+    var playouts = if (parent == null) 1 else 0
     var best = Int.MAX_VALUE
-    var children = mutableMapOf<BranchAndBoundAssignment, BbNode?>()
+    var worst: Int = parent?.worst ?: 0
+    var children = mutableMapOf<BranchAndBoundAssignment, BbNode>()
+    var untriedChildren: LinkedList<BranchAndBoundAssignment>? = null
+    fun newChild(assignment: BranchAndBoundAssignment) = BbNode(
+            this,
+            max(aggScore, assignment.end)
+    ).also { children[assignment] = it }
 
+    override fun toString() = "[$playouts] $best -- $worst"
 }
 
 class BbTree(private val project: Project) {
-    private val root = BbNode(null)
+    private val root = BbNode(null, 0)
 
     private var best = Int.MAX_VALUE
 
@@ -31,90 +38,138 @@ class BbTree(private val project: Project) {
 
         var random = false
 
+        fun getPossibleAssignments(): LinkedList<BranchAndBoundAssignment> {
+            val result = LinkedList<BranchAndBoundAssignment>()
+            for (task in leftTasks) {
+                val parentTask = task.dependsOn
+                if (parentTask != null && parentTask !in tasks) continue
+
+                for (developer in project.devsByType.getValue(task.type)) {
+                    var start = devs.getValue(developer)
+
+                    if (parentTask != null) {
+                        start = max(start, tasks.getValue(parentTask))
+                    }
+
+                    val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
+                    if (end < best)
+                        result.add(BranchAndBoundAssignment(task, developer, start, end))
+                }
+            }
+            return result
+        }
+
+        fun BranchAndBoundAssignment.add() {
+            currentScore = max(currentScore, end)
+
+            currentSolution.add(this)
+            leftTasks.remove(task)
+            tasks[task] = end
+            devs[developer] = end
+        }
+
         while (leftTasks.isNotEmpty()) {
 
-            var children = currentNode.children
+            if (random) {
+                val nextMoves = getPossibleAssignments()  // May be empty in case of bound shortcut
+                if (nextMoves.isEmpty()) {
+                    currentScore = currentNode.worst
+                    break
+                }
+                nextMoves.getRandomElement().add()
 
-            if (children == null) {
+            } else {
+                if (currentNode.playouts == 1) {
+                    // Explode the node --- but note that the incoming children may be empty because of bound shortcuts
+                    currentNode.untriedChildren = getPossibleAssignments().apply { shuffle() }
+                }
 
-                // Explode
-                children = LinkedHashMap()
+                val untriedChildren = currentNode.untriedChildren
 
-                for (task in leftTasks) {
-                    if (task.dependsOn != null && task.dependsOn !in tasks) {
-                        continue
+                if (untriedChildren == null) {
+                    // All children of this node have been played at least once.
+                    // This means we can select from them using the MCTS formula.
+
+                    // TODO consider handling the case with the only child
+
+                    var bestEntry: MutableMap.MutableEntry<BranchAndBoundAssignment, BbNode>? = null
+                    var bestScore = -1.0
+
+                    val worst = currentNode.worst
+
+                    val localBest = currentNode.best
+
+                    val denominator = (worst - localBest).toDouble()
+                    val lnNodePlays = ln(currentNode.playouts.toDouble())
+
+                    for (entry in currentNode.children.entries) {
+
+                        if (entry.value.aggScore >= best)  continue   // BB shortcut
+
+                        val node = entry.value
+
+                        val childScore = (worst - node.best) / denominator + c * sqrt(lnNodePlays / node.playouts)
+
+                        if (bestScore < childScore) {
+                            bestEntry = entry
+                            bestScore = childScore
+                        }
                     }
-                    for (developer in project.devsByType.getValue(task.type)) {
 
-                        var start = devs.getValue(developer)
+                    if (bestEntry == null) {
 
-                        if (task.dependsOn != null) {
-                            start = max(start, tasks.getValue(task.dependsOn))
+                        currentScore = currentNode.worst
+
+                        // ALL children of this node became uninteresting.
+                        // Destruct it (possibly destructing the nodes upstream)
+
+                        for (i in currentSolution.size - 2 downTo 0) {
+                            val parentNode = currentNode.parent!!
+                            val parentChildren = parentNode.children
+                            parentChildren.remove(currentSolution[i])
+                            if (parentChildren.isNotEmpty()) {
+                                break
+                            }
                         }
 
-                        val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
+                        break;
 
-
-                        children[BranchAndBoundAssignment(task, developer, start, end)] = null
-
+                    } else bestEntry.run {
+                        key.add()
+                        currentNode = value
                     }
-                }
 
-                currentNode.children = children
 
-                random = true
-            }
 
-            val choices: MutableList<BranchAndBoundAssignment> = mutableListOf()
+                } else {
+                    // There are assignments at this node which have not yet been tried.
+                    // Get another one and transform it into a regular node.
+                    val assignment = untriedChildren.pop()
 
-            val toRemove: MutableList<BranchAndBoundAssignment> = mutableListOf()
-
-            for (assignment in children.keys) {
-                if (assignment.end >= best) {
-                    toRemove.add(assignment)
-                }
-                else {
-                    choices.add(assignment)
-                }
-            }
-
-            for (assignmentToRemove in toRemove) {
-                children.remove(assignmentToRemove)
-            }
-
-            if (choices.isEmpty()) {
-                for (i in currentSolution.size - 1 downTo 0) {
-                    currentNode = currentNode.parent ?: break
-                    val assignment = currentSolution[i]
-                    val ch = children
-                    ch.remove(assignment)
-
-                    if (ch.isNotEmpty()) {
-                        break
+                    if (untriedChildren.isEmpty()) {
+                        currentNode.untriedChildren = null
                     }
+
+                    currentNode = currentNode.newChild(assignment)
+
+                    assignment.add()
+
+                    random = true
                 }
-
-                return
             }
-            else {
-                val childAssignment = choices.getRandomElement()
+        }
 
-                var node = children.getValue(childAssignment)
+        // Back-propagate playout results
 
-                currentScore = max(currentScore, childAssignment.end)
+        var backPropNode: BbNode? = currentNode
 
-                if (node == null) {
-                    node = BbNode(currentNode)
-                    children[childAssignment] = node
-                }
-
-                currentNode = node
-                currentSolution.add(childAssignment)
-
-                leftTasks.remove(childAssignment.task)
-                tasks[childAssignment.task] = childAssignment.end
-                devs[childAssignment.developer] = childAssignment.end
-            }
+        while (backPropNode != null) {
+            backPropNode.playouts++
+            if (backPropNode.worst < currentScore)
+                backPropNode.worst = currentScore
+            if (backPropNode.best > currentScore)
+                backPropNode.best = currentScore
+            backPropNode = backPropNode.parent
         }
 
         if (currentScore < best) {
@@ -125,43 +180,17 @@ class BbTree(private val project: Project) {
     }
 }
 
-fun getPossibleAssignments(
-        leftTasks: MutableSet<Task>,
-        tasks: MutableMap<Task, Int>,
-        project: Project,
-        devs: MutableMap<Developer, Int>
-): MutableList<BranchAndBoundAssignment> {
-    val result: MutableList<BranchAndBoundAssignment> = mutableListOf()
-    for (task in leftTasks) {
-        if (task.dependsOn != null && task.dependsOn !in tasks) {
-            continue
-        }
-        for (developer in project.devsByType.getValue(task.type)) {
-
-            var start = devs.getValue(developer)
-
-            if (task.dependsOn != null) {
-                start = max(start, tasks.getValue(task.dependsOn))
-            }
-
-            val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
-
-
-            result.add(BranchAndBoundAssignment(task, developer, start, end))
-
-        }
-    }
-    return result
-}
-
-
 fun useMctsBranchAndBound(p: Project) {
 
     val tree = BbTree(p)
-//    tree.best = 170
+
+    var counter = 0
 
     while (true) {
         tree.playout()
+        counter++
+        if (counter % 10000 == 0) {
+            println(counter)
+        }
     }
-
 }

@@ -38,13 +38,11 @@ fun main(args: Array<String>) {
     p.addFullStackTask("Partners", 6, 4)
     p.addFullStackTask("Marketing", 3, 3)
 
-
 //    useGenetic(p, calendar)
 //    useMCTS(p)
 
 //    useBranchAndBound(p)
     useMctsBranchAndBound(p)
-
 }
 
 
