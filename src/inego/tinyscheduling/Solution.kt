@@ -83,10 +83,8 @@ class Solution(val project: Project) {
                 }
 
                 // Developer starting date penalty
-                developer.startingDate?.let {
-                    if (it > currentDate) {
-                        penalty += EARLY_START_PENALTY
-                    }
+                if (developer.startingDate > currentDate) {
+                    penalty += EARLY_START_PENALTY
                 }
 
                 // Task dependency penalty
@@ -136,7 +134,7 @@ class Solution(val project: Project) {
 
 
         return assignments.entries.sortedBy { it.value.date }
-                .joinToString(separator = "\n") { "${it.key}: ${it.value}"}
+                .joinToString(separator = "\n") { "${it.key}: ${it.value}" }
     }
 
     val cost: SolutionScore by lazy {
@@ -154,7 +152,7 @@ class Solution(val project: Project) {
 
     fun toString(calendar: Calendar): String {
         return assignments.entries.sortedBy { it.value.date }
-                .joinToString(separator = "\n") { "${it.key}: ${it.value.toString(calendar)}"}
+                .joinToString(separator = "\n") { "${it.key}: ${it.value.toString(calendar)}" }
 
     }
 }

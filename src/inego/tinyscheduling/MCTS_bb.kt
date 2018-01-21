@@ -8,7 +8,7 @@ import kotlin.math.sqrt
 class BbNode(val parent: BbNode?, val aggScore: Int) {
     var playouts = if (parent == null) 1 else 0
     var best = Int.MAX_VALUE
-    var worst: Int = parent?.worst ?: 0
+    var worst: Int = 0
     var children = mutableMapOf<BranchAndBoundAssignment, BbNode>()
     var untriedChildren: LinkedList<BranchAndBoundAssignment>? = null
     fun newChild(assignment: BranchAndBoundAssignment) = BbNode(
@@ -73,7 +73,7 @@ class BbTree(private val project: Project) {
             if (random) {
                 val nextMoves = getPossibleAssignments()  // May be empty in case of bound shortcut
                 if (nextMoves.isEmpty()) {
-                    currentScore = currentNode.worst
+                    currentScore = currentNode.parent!!.worst + 1
                     break
                 }
                 nextMoves.getRandomElement().add()
@@ -86,75 +86,81 @@ class BbTree(private val project: Project) {
 
                 val untriedChildren = currentNode.untriedChildren
 
-                if (untriedChildren == null) {
-                    // All children of this node have been played at least once.
-                    // This means we can select from them using the MCTS formula.
-
-                    // TODO consider handling the case with the only child
-
-                    var bestEntry: MutableMap.MutableEntry<BranchAndBoundAssignment, BbNode>? = null
-                    var bestScore = -1.0
-
-                    val worst = currentNode.worst
-
-                    val localBest = currentNode.best
-
-                    val denominator = (worst - localBest).toDouble()
-                    val lnNodePlays = ln(currentNode.playouts.toDouble())
-
-                    for (entry in currentNode.children.entries) {
-
-                        if (entry.value.aggScore >= best)  continue   // BB shortcut
-
-                        val node = entry.value
-
-                        val childScore = (worst - node.best) / denominator + c * sqrt(lnNodePlays / node.playouts)
-
-                        if (bestScore < childScore) {
-                            bestEntry = entry
-                            bestScore = childScore
-                        }
-                    }
-
-                    if (bestEntry == null) {
-
-                        currentScore = currentNode.worst
-
-                        // ALL children of this node became uninteresting.
-                        // Destruct it (possibly destructing the nodes upstream)
-
-                        for (i in currentSolution.size - 2 downTo 0) {
-                            val parentNode = currentNode.parent!!
-                            val parentChildren = parentNode.children
-                            parentChildren.remove(currentSolution[i])
-                            if (parentChildren.isNotEmpty()) {
-                                break
-                            }
-                        }
-
-                        break;
-
-                    } else bestEntry.run {
-                        key.add()
-                        currentNode = value
-                    }
-
-
-
-                } else {
+                if (untriedChildren != null) {
                     // There are assignments at this node which have not yet been tried.
                     // Get another one and transform it into a regular node.
-                    val assignment = untriedChildren.pop()
+
+                    var assignment: BranchAndBoundAssignment? = null
+
+                    while (untriedChildren.isNotEmpty()) {
+                        assignment = untriedChildren.pop()
+                        if (assignment.end >= best) {
+                            assignment = null
+                        } else {
+                            break
+                        }
+                    }
 
                     if (untriedChildren.isEmpty()) {
                         currentNode.untriedChildren = null
                     }
 
-                    currentNode = currentNode.newChild(assignment)
+                    if (assignment != null) {
+                        currentNode = currentNode.newChild(assignment)
+                        assignment.add()
+                        random = true
+                        continue
+                    }
+                }
 
-                    assignment.add()
+                // All children of this node have been played at least once.
+                // This means we can select from them using the MCTS formula.
 
-                    random = true
+                // TODO consider handling the case with the only child
+
+                var bestEntry: MutableMap.MutableEntry<BranchAndBoundAssignment, BbNode>? = null
+                var bestScore = -1.0
+
+                val worst = currentNode.worst
+
+                val denominator = (worst - best).toDouble()
+                val lnNodePlays = ln(currentNode.playouts.toDouble())
+
+                for (entry in currentNode.children.entries) {
+
+                    val node = entry.value
+                    if (node.aggScore >= best) continue   // BB shortcut
+
+                    val childScore = (worst - node.best) / denominator + c * sqrt(lnNodePlays / node.playouts)
+
+                    if (bestScore < childScore) {
+                        bestEntry = entry
+                        bestScore = childScore
+                    }
+                }
+
+                if (bestEntry == null) {
+
+                    currentScore = currentNode.worst + 1
+
+                    // ALL children of this node became uninteresting.
+                    // Destruct it (possibly destructing the nodes upstream)
+
+                    for (i in currentSolution.size - 1 downTo 0) {
+                        val parentNode = currentNode.parent!!
+                        val parentChildren = parentNode.children
+                        parentChildren.remove(currentSolution[i])
+                        currentNode = parentNode
+                        if (parentChildren.isNotEmpty()) {
+                            break
+                        }
+                    }
+
+                    break
+
+                } else bestEntry.run {
+                    key.add()
+                    currentNode = value
                 }
             }
         }
