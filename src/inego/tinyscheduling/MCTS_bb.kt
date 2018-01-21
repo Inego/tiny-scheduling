@@ -2,8 +2,14 @@ package inego.tinyscheduling
 
 import kotlin.math.max
 
-class BbNode(val parent: BbNode?) {
-    var children: LinkedHashMap<BranchAndBoundAssignment, BbNode?>? = null
+class BbNode(
+        val parent: BbNode?,
+        var unplayedChildren: MutableList<BranchAndBoundAssignment>
+) {
+    var playouts = 0
+    var best = Int.MAX_VALUE
+    var children = mutableMapOf<BranchAndBoundAssignment, BbNode?>()
+
 }
 
 class BbTree(private val project: Project) {
@@ -23,15 +29,16 @@ class BbTree(private val project: Project) {
 
         var currentScore = 0
 
+        var random = false
+
         while (leftTasks.isNotEmpty()) {
 
             var children = currentNode.children
+
             if (children == null) {
 
                 // Explode
-
-                children = LinkedHashMap<BranchAndBoundAssignment, BbNode?>()
-                currentNode.children = children
+                children = LinkedHashMap()
 
                 for (task in leftTasks) {
                     if (task.dependsOn != null && task.dependsOn !in tasks) {
@@ -47,11 +54,15 @@ class BbTree(private val project: Project) {
 
                         val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
 
-                        if (end < best) {
-                            children[BranchAndBoundAssignment(task, developer, start, end)] = null
-                        }
+
+                        children[BranchAndBoundAssignment(task, developer, start, end)] = null
+
                     }
                 }
+
+                currentNode.children = children
+
+                random = true
             }
 
             val choices: MutableList<BranchAndBoundAssignment> = mutableListOf()
@@ -112,6 +123,35 @@ class BbTree(private val project: Project) {
             printBbSolution(currentSolution, project.calendar)
         }
     }
+}
+
+fun getPossibleAssignments(
+        leftTasks: MutableSet<Task>,
+        tasks: MutableMap<Task, Int>,
+        project: Project,
+        devs: MutableMap<Developer, Int>
+): MutableList<BranchAndBoundAssignment> {
+    val result: MutableList<BranchAndBoundAssignment> = mutableListOf()
+    for (task in leftTasks) {
+        if (task.dependsOn != null && task.dependsOn !in tasks) {
+            continue
+        }
+        for (developer in project.devsByType.getValue(task.type)) {
+
+            var start = devs.getValue(developer)
+
+            if (task.dependsOn != null) {
+                start = max(start, tasks.getValue(task.dependsOn))
+            }
+
+            val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
+
+
+            result.add(BranchAndBoundAssignment(task, developer, start, end))
+
+        }
+    }
+    return result
 }
 
 
