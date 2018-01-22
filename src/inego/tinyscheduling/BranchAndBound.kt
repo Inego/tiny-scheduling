@@ -15,6 +15,7 @@ class BranchAndBoundAssignment(
         val task: Task,
         val developer: Developer,
         private val start: Int,
+        val halfEnd: Int,
         val end: Int
 ) {
     override fun toString(): String = "$task to $developer ($start - $end)"
@@ -57,10 +58,12 @@ fun branchAndBoundRecursion(
                 start = max(start, tasks.getValue(task.dependsOn))
             }
 
-            val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
+            val length = (task.cost * 8 / developer.efficiency).toInt()
+            val halfEnd = start + length / 2
+            val end = start + length
 
             if (end < bb.best) {
-                assignments.add(BranchAndBoundAssignment(task, developer, start, end))
+                assignments.add(BranchAndBoundAssignment(task, developer, start, halfEnd, end))
             }
         }
     }
@@ -127,10 +130,13 @@ fun branchAndBoundRecursion(
 
 fun printBbSolution(solution: BranchAndBoundSolution, calendar: Calendar) {
 
-    for (assignment in solution) {
-        println(assignment.toString(calendar))
-    }
+    for ((developer, assignments) in solution.groupBy { it.developer }) {
+        println(developer)
+        for (assignment in assignments) {
+            println("   ${assignment.toString(calendar)}")
+        }
 
+    }
 }
 
 

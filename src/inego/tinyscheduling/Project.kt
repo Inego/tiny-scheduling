@@ -15,14 +15,37 @@ class Project(val calendar: Calendar) : ICalendar by calendar {
         developers.groupBy { it.type }
     }
 
-    fun addFullStackTask(name: String, backCost: Int, frontCost: Double, backOnlyBy: Developer? = null) {
-        val backendTask = Task("$name (B)", TaskType.BACK_END, backCost.toDouble(), onlyBy = backOnlyBy)
+    fun addFullStackTask(
+            name: String,
+            backCost: Int,
+            frontCost: Double,
+            backOnlyBy: Developer? = null,
+            frontOnlyBy: Developer? = null
+    ) {
+        val backendTask = Task(
+                "$name (B)",
+                TaskType.BACK_END,
+                backCost.toDouble(),
+                onlyBy = backOnlyBy
+        )
         tasks.add(backendTask)
-        tasks.add(Task("$name (F)", TaskType.FRONT_END, frontCost, dependsOn = backendTask))
+        tasks.add(Task(
+                "$name (F)",
+                TaskType.FRONT_END,
+                frontCost,
+                dependsOn = backendTask,
+                onlyBy = frontOnlyBy
+        ))
     }
 
-    fun addFullStackTask(name: String, backCost: Int, frontCost: Int, backOnlyBy: Developer? = null) {
-        addFullStackTask(name, backCost, frontCost.toDouble(), backOnlyBy)
+    fun addFullStackTask(
+            name: String,
+            backCost: Int,
+            frontCost: Int,
+            backOnlyBy: Developer? = null,
+            frontOnlyBy: Developer? = null
+    ) {
+        addFullStackTask(name, backCost, frontCost.toDouble(), backOnlyBy, frontOnlyBy)
     }
 
     fun addDeveloper(developer: Developer): Developer {

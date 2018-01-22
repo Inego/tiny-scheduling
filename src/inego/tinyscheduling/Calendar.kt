@@ -2,6 +2,7 @@ package inego.tinyscheduling
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
 
 interface ICalendar {
     fun intToDate(int: Int): LocalDate
@@ -11,6 +12,7 @@ interface ICalendar {
 fun isWeekend(date: LocalDate): Boolean {
     val dayOfWeek = date.dayOfWeek
     return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY
+            || date.month == Month.FEBRUARY && date.dayOfMonth == 23
 }
 
 /**

@@ -55,9 +55,13 @@ class BbTree(private val project: Project) {
                         start = max(start, tasks.getValue(parentTask))
                     }
 
-                    val end: Int = start + (task.cost * 8 / developer.efficiency).toInt()
+                    val length = (task.cost * 8 / developer.efficiency).toInt()
+
+                    val halfEnd = start + length / 2
+                    val end = start + length
+
                     if (end < best)
-                        result.add(BranchAndBoundAssignment(task, developer, start, end))
+                        result.add(BranchAndBoundAssignment(task, developer, start, halfEnd, end))
                 }
             }
             return result
@@ -68,7 +72,7 @@ class BbTree(private val project: Project) {
 
             currentSolution.add(this)
             leftTasks.remove(task)
-            tasks[task] = end
+            tasks[task] = halfEnd
             devs[developer] = end
         }
 
@@ -199,7 +203,7 @@ fun useMctsBranchAndBound(p: Project) {
     while (true) {
         tree.playout()
         counter++
-        if (counter % 10000 == 0) {
+        if (counter % 50000 == 0) {
             println(counter)
         }
     }
