@@ -30,7 +30,12 @@ fun main(args: Array<String>) {
 
     p.addDeveloper(dima)
     p.addDeveloper(sveta)
-//    p.addDeveloper(Developer("Max", TaskType.FRONT_END, efficiency = 0.7))
+    p.addDeveloper(Developer(
+            "Max",
+            TaskType.FRONT_END,
+            efficiency = 0.7,
+            startingDate = calendar.dateToInt(LocalDate.of(2018, 2, 12))
+    ))
 
     p.addFullStackTask("Admin panel", 9, 6)
     p.addFullStackTask("Reports", 5, 3)
