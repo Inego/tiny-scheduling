@@ -19,14 +19,15 @@ class BbNode(val parent: BbNode?, val aggScore: Int) {
     override fun toString() = "[$playouts] $best -- $worst"
 }
 
-class BbTree(private val project: Project) {
+class BbTree(private val project: Project, private val bestFoundCallback: (BranchAndBoundSolution, Int) -> Unit) {
     private val root = BbNode(null, 0)
 
     private var best = Int.MAX_VALUE
 
-    fun playout() {
+    fun playout(): MutableList<BranchAndBoundAssignment> {
 
-        val leftTasks: MutableSet<Task> = project.tasks.toMutableSet()
+        val projectTasks = project.tasks
+        val leftTasks: MutableSet<Task> = projectTasks.toMutableSet()
         val tasks: MutableMap<Task, Int> = mutableMapOf()
         val devs = project.developers.associate { Pair(it, it.startingDate * 8) }.toMutableMap()
 
@@ -39,11 +40,22 @@ class BbTree(private val project: Project) {
         var random = false
 
         fun getPossibleAssignments(): LinkedList<BranchAndBoundAssignment> {
+
+            var hasFirst: Boolean? = null
+
             val result = LinkedList<BranchAndBoundAssignment>()
             for (task in leftTasks) {
+
+                if (hasFirst == null) {
+                    hasFirst = task.first
+                } else {
+                    if (hasFirst != task.first) {
+                        break
+                    }
+                }
+
                 val parentTask = task.dependsOn
                 if (parentTask != null && parentTask !in tasks) continue
-
 
                 val possibleDevs = if (task.onlyBy != null) listOf(task.onlyBy)
                 else project.devsByType.getValue(task.type)
@@ -188,15 +200,21 @@ class BbTree(private val project: Project) {
 
         if (currentScore < best) {
             best = currentScore
-            println("$best: ${project.calendar.hoursToString(best)}")
-            printBbSolution(currentSolution, project.calendar)
+            bestFoundCallback(currentSolution, best)
+//            println("$best: ${project.calendar.hoursToString(best)}")
+//            printBbSolution(currentSolution, project.calendar)
         }
+
+        return currentSolution
     }
 }
 
 fun useMctsBranchAndBound(p: Project) {
 
-    val tree = BbTree(p)
+    val tree = BbTree(p) { solution, best ->
+        println("$best: ${p.calendar.hoursToString(best)}")
+        printBbSolution(solution, p.calendar)
+    }
 
     var counter = 0
 

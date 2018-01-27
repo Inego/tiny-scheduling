@@ -4,7 +4,16 @@ import java.util.*
 import kotlin.math.ceil
 
 class Project(val calendar: Calendar) : ICalendar by calendar {
-    val tasks: MutableList<Task> = mutableListOf()
+    private val _tasks: MutableList<Task> = mutableListOf()
+    val tasks
+        get() = _tasks.toList()
+
+    fun add(task: Task): Task {
+        _tasks.add(task)
+        _tasks.sortBy { !it.first }
+        return task
+    }
+
     val developers: MutableList<Developer> = mutableListOf()
 
     internal val maxEstimatedLength: Int by lazy {
@@ -20,21 +29,24 @@ class Project(val calendar: Calendar) : ICalendar by calendar {
             backCost: Int,
             frontCost: Double,
             backOnlyBy: Developer? = null,
-            frontOnlyBy: Developer? = null
+            frontOnlyBy: Developer? = null,
+            first: Boolean = false
     ) {
         val backendTask = Task(
                 "$name (B)",
                 TaskType.BACK_END,
                 backCost.toDouble(),
-                onlyBy = backOnlyBy
+                onlyBy = backOnlyBy,
+                first = first
         )
-        tasks.add(backendTask)
-        tasks.add(Task(
+        add(backendTask)
+        add(Task(
                 "$name (F)",
                 TaskType.FRONT_END,
                 frontCost,
                 dependsOn = backendTask,
-                onlyBy = frontOnlyBy
+                onlyBy = frontOnlyBy,
+                first = first
         ))
     }
 
@@ -43,19 +55,15 @@ class Project(val calendar: Calendar) : ICalendar by calendar {
             backCost: Int,
             frontCost: Int,
             backOnlyBy: Developer? = null,
-            frontOnlyBy: Developer? = null
+            frontOnlyBy: Developer? = null,
+            first: Boolean = false
     ) {
-        addFullStackTask(name, backCost, frontCost.toDouble(), backOnlyBy, frontOnlyBy)
+        addFullStackTask(name, backCost, frontCost.toDouble(), backOnlyBy, frontOnlyBy, first)
     }
 
     fun addDeveloper(developer: Developer): Developer {
         developers.add(developer)
         return developer
-    }
-
-    fun addTask(task: Task): Task {
-        tasks.add(task)
-        return task
     }
 
     fun createRandomSolution(): Solution {
