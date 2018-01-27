@@ -7,8 +7,6 @@ import java.awt.Font.BOLD
 
 class MyGanttChart(val project: Project) : JPanel() {
 
-
-
     var interimResult: InterimResult? = null
 
     private var counter = 0
@@ -22,21 +20,35 @@ class MyGanttChart(val project: Project) : JPanel() {
         val g2 = g as Graphics2D
 
         paintGanttChart(g2, width, height)
-
     }
 
     private fun paintGanttChart(g2: Graphics2D, width: Int, height: Int) {
 
         val current = interimResult
 
-        g2.drawString(counter.toString(), 10, 20)
+        val defaultColor = g2.color
 
         if (current == null) {
             g2.drawString("Computing...", 10, 40)
         } else {
+            g2.color = TOP_ROW_BG_COLOR
+            g2.fillRect(0, 0, width, TOP_ROW_HEIGHT)
+
+            g2.color = defaultColor
+
             g2.font = boldFont
             g2.drawString(current.score.toString(), 70, 20)
+
+            val devs = project.developers
+            val devHeight = (height - TOP_ROW_HEIGHT) / devs.size
+
+
+
         }
+
+        g2.font = font
+
+        g2.drawString(counter.toString(), 10, 20)
     }
 
     fun incCounter() {
@@ -46,7 +58,8 @@ class MyGanttChart(val project: Project) : JPanel() {
     }
 
     companion object {
-        const val TOP_ROW_HEIGHT = 20
+        const val TOP_ROW_HEIGHT = 30
+        val TOP_ROW_BG_COLOR: Color = Color.LIGHT_GRAY
     }
 
 }
