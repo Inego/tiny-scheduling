@@ -66,8 +66,9 @@ class Calendar(private val startingDate: LocalDate, private val holidayChecker: 
     }
 
     fun hoursToString(hours: Int): String {
-        val date = hours / 8
-        val remainder = hours - date * 8
-        return "${intToDate(date)}:$remainder"
+        val dateInt = hours / 8
+        val remainder = hours - dateInt * 8
+        val date = intToDate(dateInt)
+        return if (remainder != 0) "$date .$remainder" else date.toString()
     }
 }

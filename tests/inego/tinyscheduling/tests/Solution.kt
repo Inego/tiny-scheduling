@@ -40,7 +40,7 @@ class SolutionTest {
 
     private fun addTask(cost: Int): Task {
         val task = Task("Test task ${p.tasks.size + 1}", TaskType.BACK_END, cost)
-        return p.addTask(task)
+        return p.add(task)
     }
 
     private fun addDev(): Developer {

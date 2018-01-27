@@ -14,7 +14,7 @@ class BranchAndBound(val project: Project) {
 class BranchAndBoundAssignment(
         val task: Task,
         val developer: Developer,
-        private val start: Int,
+        val start: Int,
         val halfEnd: Int,
         val end: Int
 ) {

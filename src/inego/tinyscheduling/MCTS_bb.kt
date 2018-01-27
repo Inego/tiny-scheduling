@@ -26,7 +26,8 @@ class BbTree(private val project: Project, private val bestFoundCallback: (Branc
 
     fun playout(): MutableList<BranchAndBoundAssignment> {
 
-        val leftTasks: MutableSet<Task> = project.tasks.toMutableSet()
+        val projectTasks = project.tasks
+        val leftTasks: MutableSet<Task> = projectTasks.toMutableSet()
         val tasks: MutableMap<Task, Int> = mutableMapOf()
         val devs = project.developers.associate { Pair(it, it.startingDate * 8) }.toMutableMap()
 
@@ -39,11 +40,22 @@ class BbTree(private val project: Project, private val bestFoundCallback: (Branc
         var random = false
 
         fun getPossibleAssignments(): LinkedList<BranchAndBoundAssignment> {
+
+            var hasFirst: Boolean? = null
+
             val result = LinkedList<BranchAndBoundAssignment>()
             for (task in leftTasks) {
+
+                if (hasFirst == null) {
+                    hasFirst = task.first
+                } else {
+                    if (hasFirst != task.first) {
+                        break
+                    }
+                }
+
                 val parentTask = task.dependsOn
                 if (parentTask != null && parentTask !in tasks) continue
-
 
                 val possibleDevs = if (task.onlyBy != null) listOf(task.onlyBy)
                 else project.devsByType.getValue(task.type)

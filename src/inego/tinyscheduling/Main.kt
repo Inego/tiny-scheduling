@@ -1,10 +1,7 @@
 package inego.tinyscheduling
 
-import java.time.LocalDate
 import kotlin.math.ceil
 import kotlin.math.max
-
-val startingDate = LocalDate.of(2018, 1, 22)!!
 
 fun main(args: Array<String>) {
 
