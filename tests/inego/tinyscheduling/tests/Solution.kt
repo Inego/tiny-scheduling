@@ -17,7 +17,7 @@ class SolutionTest {
     }
 
     @Test
-    fun `one day task, one dev`() {
+    fun testOneDevOneTask() {
         val dev = addDev()
         val t = addTask(1)
         s.assign(t, 0, dev)
