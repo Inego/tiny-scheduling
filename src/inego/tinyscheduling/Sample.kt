@@ -34,15 +34,15 @@ fun createSampleProject(): Project {
     p.addDeveloper(sveta)
 //    p.addDeveloper(max)
 
-    p.addFullStackTask("Admin panel", 9, 6)
-    p.addFullStackTask("Reports", 5, 3)
-    p.addFullStackTask("Catalog", 1, 3, frontOnlyBy=sveta, backOnlyBy = yanis, first = true)
-    p.addFullStackTask("Dealers", 4, 4, frontOnlyBy = dima, backOnlyBy = alex, first = true)
-    p.addFullStackTask("News", 2, 1.5)
-    p.addFullStackTask("Employees", 3, 3)
-    p.addFullStackTask("Partners", 6, 4)
-    p.addFullStackTask("Marketing", 3, 3, backOnlyBy = yanis)
-    p.addFullStackTask("Closing", 3, 2, backOnlyBy=alex)
+    p.addFullStackTask("Admin panel", 9.0, 6.0)
+    p.addFullStackTask("Reports", 5.0, 3.0)
+    p.addFullStackTask("Catalog", 1.5, 3.0, frontOnlyBy=sveta, backOnlyBy = yanis, first = true)
+    p.addFullStackTask("Dealers", 4.0, 4.0, frontOnlyBy = dima, backOnlyBy = alex, first = true)
+    p.addFullStackTask("News", 2.0, 1.5)
+    p.addFullStackTask("Employees", 3.0, 3.0)
+    p.addFullStackTask("Partners", 6.0, 4.0)
+    p.addFullStackTask("Marketing", 3.0, 3.0, backOnlyBy = yanis)
+    p.addFullStackTask("Closing", 3.0, 2.0, backOnlyBy=alex)
 
     return p
 }
