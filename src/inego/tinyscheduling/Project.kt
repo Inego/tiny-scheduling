@@ -32,14 +32,20 @@ class Project(val calendar: Calendar) : ICalendar by calendar {
             frontOnlyBy: Developer? = null,
             first: Boolean = false
     ) {
-        val backendTask = Task(
+        var backendTask: Task? = Task(
                 "$name (B)",
                 TaskType.BACK_END,
                 backCost,
                 onlyBy = backOnlyBy,
                 first = first
         )
-        add(backendTask)
+        if (backCost != 0.0) {
+            add(backendTask!!)
+        }
+        else {
+            backendTask = null
+        }
+
         add(Task(
                 "$name (F)",
                 TaskType.FRONT_END,
