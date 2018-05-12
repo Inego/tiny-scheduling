@@ -201,8 +201,6 @@ class BbTree(private val project: Project, private val bestFoundCallback: (Branc
         if (currentScore < best) {
             best = currentScore
             bestFoundCallback(currentSolution, best)
-//            println("$best: ${project.calendar.hoursToString(best)}")
-//            printBbSolution(currentSolution, project.calendar)
         }
 
         return currentSolution

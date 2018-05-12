@@ -1,17 +1,34 @@
 package inego.tinyscheduling
 
+import com.xenomachina.argparser.ArgParser
+import com.xenomachina.argparser.default
 import kotlin.math.ceil
 import kotlin.math.max
 
+const val MODE_MCTS_BB: String = "mcts_bb"
+const val MODE_MCTS: String = "mcts"
+const val MODE_BB: String = "bb"
+const val MODE_GENETIC: String = "genetic"
+
+private class ProgramArgs(parser: ArgParser) {
+    val mode by parser.positional("Mode of computation").default(MODE_MCTS_BB)
+}
+
 fun main(args: Array<String>) {
+
+    val parsedArgs = ArgParser(args).parseInto(::ProgramArgs)
 
     val p = createSampleProject()
 
-//    useGenetic(p, calendar)
-//    useMCTS(p)
+    val mode = parsedArgs.mode
 
-//    useBranchAndBound(p)
-    useMctsBranchAndBound(p)
+    when (mode) {
+        MODE_MCTS_BB -> useMctsBranchAndBound(p)
+        MODE_MCTS -> useMCTS(p)
+        MODE_BB -> useBranchAndBound(p)
+        MODE_GENETIC -> useGenetic(p, createSampleCalendar())
+        else -> throw IllegalArgumentException("Unknown mode: $mode")
+    }
 }
 
 fun randomWithMCTS(p: Project, maxIter: Int): Solution {
@@ -23,14 +40,10 @@ fun randomWithMCTS(p: Project, maxIter: Int): Solution {
 
     var bestCost = currentBest.cost.total
 
-    var currentMaxIter = maxIter
-
     var counter = 0
 
     while (true) {
-        if (counter > currentMaxIter) {
-
-//            println("$currentMaxIter $bestCost")
+        if (counter > maxIter) {
 
             if (nextBest == currentBest)
             {
@@ -40,7 +53,7 @@ fun randomWithMCTS(p: Project, maxIter: Int): Solution {
             currentBest = nextBest
             tree = Tree(p)
             counter = 0
-//            currentMaxIter += maxIter
+
         }
         val solution = tree.playout(currentBest, bestCost, 2)
 
@@ -137,14 +150,6 @@ private fun useGenetic(p: Project, calendar: Calendar) {
         }
 
     }
-
-
-
-
-//    var pop = p.createRandomPopulation(50)
-
-//    var pop = p.createRandomPopulationByMCTS(50, 1000)
-
 
 }
 

@@ -28,7 +28,7 @@ class MyGanttChart(val project: Project) : JPanel() {
         val current = interimResult
 
         val defaultColor = g2.color
-//        val taskColor = Color.BLUE
+
         val taskColor = Color(200, 240, 255)
 
         val dashed = BasicStroke(
@@ -39,8 +39,6 @@ class MyGanttChart(val project: Project) : JPanel() {
                 floatArrayOf(3f),
                 0F
         )
-
-
 
         if (current == null) {
             g2.drawString("Computing...", 10, 40)
@@ -211,8 +209,6 @@ fun main(args: Array<String>) {
         frame.setLocation((dim.width - frame.width) / 2, (dim.height - frame.height) / 2)
 
         frame.isVisible = true
-
-//        frame.extendedState = frame.extendedState or JFrame.MAXIMIZED_BOTH
 
         val worker = ComputeWorker(chart)
 

@@ -3,7 +3,7 @@ package inego.tinyscheduling
 import java.time.LocalDate
 
 fun createSampleProject(): Project {
-    val calendar = Calendar(startingDate, ::isWeekend)
+    val calendar = createSampleCalendar()
 
     val p = Project(calendar)
 
@@ -47,5 +47,7 @@ fun createSampleProject(): Project {
 
     return p
 }
+
+fun createSampleCalendar() = Calendar(startingDate, ::isWeekend)
 
 val startingDate = LocalDate.of(2018, 2, 9)!!

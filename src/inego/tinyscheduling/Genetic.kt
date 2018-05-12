@@ -117,13 +117,8 @@ class Population(private val project: Project, val individuals: List<Solution>) 
 
 }
 
+
 fun Project.createPopulation(individuals: List<Solution>): Population = Population(this, individuals)
-
-
-fun Project.createRandomPopulation(size: Int): Population {
-    val individuals: List<Solution> = List(size) { createRandomSolution() }
-    return createPopulation(individuals)
-}
 
 
 fun createChildFromParents(parent1: Solution, parent2: Solution): Solution {

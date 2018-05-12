@@ -131,8 +131,6 @@ class Solution(val project: Project) {
     fun getAssignment(task: Task): TaskAssignment = assignments.getValue(task)
 
     override fun toString(): String {
-
-
         return assignments.entries.sortedBy { it.value.date }
                 .joinToString(separator = "\n") { "${it.key}: ${it.value}" }
     }

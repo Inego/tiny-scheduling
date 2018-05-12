@@ -5,8 +5,6 @@ import kotlin.math.ln
 import kotlin.math.sqrt
 
 val c = sqrt(2.0)
-//val c = 1.5
-
 
 abstract class Modification(val task: Task) {
     abstract fun applyTo(solution: Solution)
@@ -57,8 +55,6 @@ class Node(val parent: Node?) {
     fun explode() {
         children = LinkedHashMap()
     }
-
-
 }
 
 class Tree(private val project: Project) {
@@ -153,7 +149,6 @@ class Tree(private val project: Project) {
 
         while (true)
         {
-
             currentNode.sum += score
 
             currentNode.playouts++
