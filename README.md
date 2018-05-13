@@ -17,7 +17,7 @@ All tasks and developers are assigned one of these skill-sets.
 
 ### Developer
 
-A [developer](inego.tinyscheduling.Developer) is an executor of tasks, and has:
+A [developer](src/inego/tinyscheduling/Developer.kt) is an executor of tasks, and has:
 * Name
 * Skill-set
 * Efficiency (ratio to the Ideal developer)
@@ -47,8 +47,7 @@ a plausible form (skipping weekends or holidays).
 
 ### Project
 
-A project is a set of a calendar, developers and tasks, and serves as an
-input to the optimizing algorithms.
+A project consists of a calendar, a set developers and tasks, and serves as an input to the optimizing algorithms.
 
 ## Goal
 
@@ -60,6 +59,51 @@ as to minimize the moment the last task is completed.
 Currently, the input is hard-coded. See `inego/tinyscheduling/Sample.kt`.
 
 ## Approaches
+
+### Genetic Algorithm
+
+Solutions in this approach tolerate different violations of restrictions
+imposed by the model, and these restrictions are penalized.
+
+This approach allowed to retain the maximum number of model features,
+but showed to be quite slow.
+
+### Monte Carlo tree search
+
+A run of the program with this approach represents a single step in
+repeated local optimum search performed with the Monte Carlo tree search
+algorithm.
+
+A "move", or a node in the tree, is a modification of the parent solution
+consisting of either changing a developer assigned to a certain task,
+or changing its date.
+
+Playouts are performed until a better solution is found, in which case
+this solution becomes the root of the tree.
+
+### Plain Branch-and-bound
+
+This (and the next) approach perform search in a space of lighter
+solutions, namely, there is no leader penalty.
+
+The search is exhaustive in the tree of solutions, where the root
+is an empty set of assignments and every node's children are defined
+by corresponding sets of possible assignments of available tasks.
+
+See the [Wikipedia article](https://en.wikipedia.org/wiki/Branch_and_bound).
+
+This approach is the slowest, since the search space is too huge and
+the BB heuristic can't cope with it well.
+
+### MCTS / BB combination
+
+As above, but the tree is explored with MCTS algorithm, applying
+BB heuristics (which significantly simplifies and lightens the tree
+by constantly chopping off branches known to contain suboptimal
+solutions only.
+
+This algorithm finds the optimum (or solutions very close to it) very
+quickly.
 
 ## UI / Visualisation
 

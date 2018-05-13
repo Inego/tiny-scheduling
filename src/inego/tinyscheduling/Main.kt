@@ -96,7 +96,6 @@ private fun useMCTS(p: Project) {
             tree = Tree(p)
             counter = 0
         } else {
-
             counter++
         }
     }

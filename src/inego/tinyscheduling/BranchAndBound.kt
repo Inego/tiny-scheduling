@@ -31,9 +31,6 @@ fun branchAndBoundRecursion(
         solutionEnd: Int
 ) {
     bb.counter++
-//    if (bb.counter % 100000 == 0) {
-//        println(bb.counter)
-//    }
 
     currentSolution
             .filter { it.end > solutionEnd }
@@ -79,8 +76,6 @@ fun branchAndBoundRecursion(
     if (leftTasks.size == 1) {
         // Just take the first assignment, it is locally best
 
-//        assignments.sortBy { it.end }
-
         val firstAssignment = assignments.first()
 
         val end = max(solutionEnd, firstAssignment.end)
@@ -93,7 +88,6 @@ fun branchAndBoundRecursion(
             printBbSolution(bb.bestSolution!!, bb.project.calendar)
         }
     } else {
-//        assignments.shuffle()
         for (assignment in assignments) {
 
             val end = assignment.end
@@ -103,7 +97,6 @@ fun branchAndBoundRecursion(
             }
 
             if (end >= bb.best)
-//                continue
                 break
 
             val task = assignment.task
